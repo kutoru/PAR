@@ -1,6 +1,6 @@
 <h2>Project status</h2>
 Right now it is just a raw idea.<br>
-Currently I'm figuring out what crates to use and how the app will generally function.<br>
+Currently I'm figuring out what Rust crates to use and how the app will generally function.<br>
 
 <h2>What is this project about</h2>
 PAR is short for Pixiv Artist Reviewer.<br>
