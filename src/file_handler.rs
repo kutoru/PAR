@@ -1,6 +1,6 @@
 use druid::ImageBuf;
 use std::path::Path;
-use std::fs::create_dir;
+use std::fs::{create_dir, remove_file};
 use crate::data::{ArtistResult, AppData, UserData};
 use crate::pixiv_handler::reset_artist_list;
 
@@ -112,6 +112,46 @@ pub fn mark_as_checked_up_to_index(artist_index: u16) {
         }
     }
     save_artist_list(&list);
+}
+
+fn delete_artist_info_if_exists(artist_id: u32) {
+    // have to do this because sometimes pixiv returns artist and profile picture with id 0 and the app downloads it
+    if artist_id != 0 {
+        delete_artist_info_if_exists(0);
+    }
+
+    let json_path = format!("./jsons/{}.json", artist_id);
+    if !does_path_exist(&json_path) {
+        return;
+    }
+
+    let artist_info = load_artist_info(artist_id);
+
+    for index in 0..4 {
+        let illust_id = artist_info.illusts[index].id;
+        if illust_id != 0 {
+            let image_path = get_path_to_illust(illust_id);
+            match remove_file(image_path) { _ => {} };
+        }
+    }
+
+    let image_path = get_path_to_pfp(artist_id);
+    match remove_file(image_path) { _ => {} };
+    match remove_file(json_path) { _ => {} };
+}
+
+/// Deletes old artists' json and images
+pub fn remove_old_artists(current_artist_index: u16, max_allowed_amount: usize) {
+    let artist_index = current_artist_index as usize;
+    if artist_index+2 <= max_allowed_amount {
+        return;
+    }
+
+    let delete_up_to = artist_index + 2 - max_allowed_amount;
+    let list = get_artist_list().unwrap();
+    for index in 0..delete_up_to {
+        delete_artist_info_if_exists(list[index].0);
+    }
 }
 
 pub fn get_image_buf(path: &str) -> ImageBuf {

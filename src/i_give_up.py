@@ -46,7 +46,7 @@ def create_empty_illust():
         "id": 0,
         "views": 0,
         "bookmarks": 0,
-        "upload_date": "None",
+        "upload_date": "Upload date",
         "is_bookmarked": False
     }
 

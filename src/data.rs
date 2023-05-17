@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use druid::{Data, ImageBuf, Lens};
-use crate::file_handler::{get_image_buf, get_path_to_pfp, get_path_to_illust, get_small_artist_info, load_artist_info, get_last_checked_artist_index, mark_as_checked_up_to_index, does_path_exist};
+use crate::file_handler::{get_image_buf, get_path_to_pfp, get_path_to_illust, get_small_artist_info, load_artist_info, get_last_checked_artist_index, mark_as_checked_up_to_index, does_path_exist, remove_old_artists};
 use crate::pixiv_handler::{download_artist_info, check_token_validity, check_amount_to_search_validity, check_timezone_validity, reset_artist_list};
 use crate::ui_globals::ui;
 
@@ -36,6 +36,8 @@ pub struct AppData {
     pub temp_token: String,
     pub temp_amount_to_search: String,
     pub temp_timezone: String,
+    /// Maximum amount of artist jsons and images to store
+    pub max_downloaded_artists: usize,
     /// Whether the artist has been checked or not (aka whether their info was downloaded for the first time or not)
     pub has_been_checked: bool,
     /// Total artist count
@@ -133,6 +135,7 @@ impl AppData {
 
         let artist_result = {
             if redownload_if_exists || !does_path_exist(&format!("./jsons/{}.json", artist_id)) {
+                remove_old_artists(self.artist_index, self.max_downloaded_artists);
                 download_artist_info(&self.settings, artist_id)
             } else {
                 load_artist_info(artist_id)
@@ -165,6 +168,7 @@ impl AppData {
             temp_token: user_data.token,
             temp_amount_to_search: user_data.amount_to_search,
             temp_timezone: user_data.timezone,
+            max_downloaded_artists: 30,
             has_been_checked: false,
             total_artists: 0,
             artist_index: get_last_checked_artist_index(),
