@@ -93,8 +93,6 @@ def delete_all_artist_info_if_exists():
 ##### DOWNLOAD ARTIST LIST #####
 
 def download_artist_list(token, page_limit=0):
-    # delete the limit later
-    page_limit = 1
     delete_all_artist_info_if_exists()
 
     client = initialize_client(token)
@@ -103,10 +101,10 @@ def download_artist_list(token, page_limit=0):
     #artists = client.user_following(client.user_id, "private")
     artists = client.user_following(client.user_id)
 
-    temp_count = 0
+    page_count = 0
     while True:
-        temp_count += 1
-        if page_limit > 0 and temp_count > page_limit:
+        page_count += 1
+        if page_limit > 0 and page_count > page_limit:
             break
 
         for artist in artists["user_previews"]:
